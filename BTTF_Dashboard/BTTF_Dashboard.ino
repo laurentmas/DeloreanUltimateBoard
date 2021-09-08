@@ -61,7 +61,7 @@ int turnSignalStatus = 0; //0=off,1=leftSignal,2=rightSignal,3=hazard
 unsigned long startupMillis;
 unsigned long seatBeltMillis;
 
-int lowFuelTime=30000;//time in millis 
+int lowFuelTime=3600000;//time in millis 
 int seatBeltTime=6000;
 
 int messageSize = 0;
