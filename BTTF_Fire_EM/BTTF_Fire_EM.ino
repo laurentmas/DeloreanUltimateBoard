@@ -75,6 +75,12 @@ int FluxC_Lv  = 0;
 #define HOVER_MODE_ON 6
 #define FLAMES_ON_HOVER_MODE_ON 7 //All On
 #define FLAMES_OFF_HOVER_MODE_ON 8
+#define MUSEUM_ON 9
+#define MUSEUM_OFF 10
+#define MUSEUM_ON_HOVER_MODE_OFF 12
+#define MUSEUM_OFF_HOVER_MODE_OFF 13
+#define MUSEUM_ON_HOVER_MODE_ON 15
+#define MUSEUM_OFF_HOVER_MODE_ON 16
 
 unsigned long hovermodLastTime = 0;
 int hovermodWait = 80;
@@ -96,6 +102,9 @@ int messageSize = 0;
 
 bool gReverseDirection = false;
 CRGB leds[NUM_LEDS];
+
+///Activate Flames when Musuem mode is on (infinity loop)?
+bool museumFlames = false;
 
 void setup() {
 
@@ -142,18 +151,19 @@ void loop()
 
   //Serial.println(BR_DEF);
   
-  if ((SW_LED_SEQ==1)|| (SW_LED_SEQ==4)|| (SW_LED_SEQ==7)) {
+  if ((SW_LED_SEQ==1) || (SW_LED_SEQ==4) || (SW_LED_SEQ==7) || (((SW_LED_SEQ==9) || (SW_LED_SEQ==12) || (SW_LED_SEQ==15))&&museumFlames)) {
      FluxC_Lv = 8;
      BR_DEF=BRIGHTNESS;
      R_BR = BRIGHTNESS_MAX;
      R_INT = MODE_2_INTERVAL;
      flames_mode_activated=true;
+     Serial.println("Flames Activated");
   } else {
     FluxC_Lv = 0;
     flames_mode_activated=false;
     }
 
-  if ((SW_LED_SEQ==6) || (SW_LED_SEQ==7)|| (SW_LED_SEQ==8)) {    
+  if ((SW_LED_SEQ==6) || (SW_LED_SEQ==7) || (SW_LED_SEQ==8) || (SW_LED_SEQ==15) || (SW_LED_SEQ==16)) {    
     hover_mode_activated=true;
     analogWrite(HOVER_MOD_FRONT,hover_central_max);
     analogWrite(HOVER_MOD_BACK,hover_central_max);
