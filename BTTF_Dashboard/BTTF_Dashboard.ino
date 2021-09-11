@@ -161,6 +161,7 @@ void loop() {
         break;
 
       case ENGINE_ON : //Engine Start
+        delay(300);
         SW_LED[getSWPos(Battery)] = false;
         digitalWrite(Battery, LOW);
         SW_LED[getSWPos(Oil)] = false;
