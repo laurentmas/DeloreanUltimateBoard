@@ -93,6 +93,7 @@ byte hover_central_current [3] = {hover_central_max,hover_central_mid,hover_cent
 
 bool flames_mode_activated=false;
 bool hover_mode_activated=false;
+bool museumFlames = false;///Activate Flames when Musuem mode is on (infinity loop)?
 
 #define DEBUG 1
 #define I2C_ADDRESS 9
@@ -102,9 +103,6 @@ int messageSize = 0;
 
 bool gReverseDirection = false;
 CRGB leds[NUM_LEDS];
-
-///Activate Flames when Musuem mode is on (infinity loop)?
-bool museumFlames = false;
 
 void setup() {
 
@@ -124,7 +122,6 @@ void setup() {
   delay(1000); // sanity delay
 
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-
   FastLED.setBrightness( BR_DEF );
 
   Wire.begin(I2C_ADDRESS);                // join i2c bus with address #9
