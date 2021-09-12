@@ -61,8 +61,8 @@ int turnSignalStatus = 0; //0=off,1=leftSignal,2=rightSignal,3=hazard
 unsigned long startupMillis;
 unsigned long seatBeltMillis;
 
-int lowFuelTime=3600000;//time in millis 
-int seatBeltTime=6000;
+int lowFuelTime = 3600000; //time in millis
+int seatBeltTime = 6000;
 
 int messageSize = 0;
 
@@ -108,9 +108,9 @@ void loop() {
         Serial.println();
     #endif
 
-    messageSize = 0;    
+    messageSize = 0;
 
-    if(startupMillis==0)//if startup time was Finished and a new key is send then restart it
+    if (startupMillis == 0) //if startup time was Finished and a new key is send then restart it
     {
       startupMillis = millis();
     }
@@ -121,9 +121,9 @@ void loop() {
         stopAllLeds();
         lastTurnBlink = 0;
         turnSignalStatus = 0;
-        seatBeltMillis=0;
-        startupMillis=0;
-        
+        seatBeltMillis = 0;
+        startupMillis = 0;
+
         #ifdef DEBUG
                 Serial.println("Stop All");
         #endif
@@ -138,7 +138,7 @@ void loop() {
         digitalWrite(HandBrake, HIGH);
         SW_LED[getSWPos(HandBrake)] = true;
         digitalWrite(HandBrake, HIGH);
-        
+
         #ifdef DEBUG
                 Serial.println("Ignition On -> Battery On, Oil On, HandBrake On");
         #endif
@@ -152,8 +152,8 @@ void loop() {
         digitalWrite(HandBrake, LOW);
         SW_LED[getSWPos(SeatBelt)] = false;
         digitalWrite(SeatBelt, LOW);
-        seatBeltMillis=0;
-        startupMillis=0;
+        seatBeltMillis = 0;
+        startupMillis = 0;
 
         #ifdef DEBUG
                 Serial.println("Ignition Off -> Battery Off, Oil Off, HandBrake Off");
@@ -168,8 +168,8 @@ void loop() {
         digitalWrite(Oil, LOW);
         SW_LED[getSWPos(SeatBelt)] = true;
         digitalWrite(SeatBelt, HIGH);
-        seatBeltMillis=millis();
-        
+        seatBeltMillis = millis();
+
         #ifdef DEBUG
                 Serial.println("Engine Start -> Battery Off, Oil Off, Seat Belt on for 3.5s");
         #endif
@@ -187,9 +187,9 @@ void loop() {
         #endif
         break;
       case ENGINE_OFF : //Engine Stop
-      #ifdef DEBUG
-              Serial.println("Engine Stop -> ...");
-      #endif
+        #ifdef DEBUG
+                Serial.println("Engine Stop -> ...");
+        #endif
         break;
 
       case DOOR_ON : //Door Open
@@ -276,7 +276,7 @@ void loop() {
         turnSignalStatus = 0; //0=off,1=leftSignal,2=rightSignal,3=hazard
 
         #ifdef TRACE
-          Serial.println("Warning/Hazard Off");
+                Serial.println("Warning/Hazard Off");
         #endif
         break;
 
@@ -285,7 +285,7 @@ void loop() {
         analogWrite(HighBeam, blue_pwm);
 
         #ifdef DEBUG
-          Serial.println("High Beam ON");
+                Serial.println("High Beam ON");
         #endif
         break;
       case H_BEAM_OFF : //High Beam OFF
@@ -293,7 +293,7 @@ void loop() {
         digitalWrite(HighBeam, LOW);
 
         #ifdef DEBUG
-          Serial.println("High Beam OFF");
+                Serial.println("High Beam OFF");
         #endif
         break;
       case L_BEAM_ON : //Low Beam ON
@@ -301,7 +301,7 @@ void loop() {
         analogWrite(LowBeam, green_pwm);
 
         #ifdef DEBUG
-          Serial.println("Low Beam ON");
+                Serial.println("Low Beam ON");
         #endif
         break;
       case L_BEAM_OFF : //Low Beam OFF
@@ -309,7 +309,7 @@ void loop() {
         digitalWrite(LowBeam, LOW);
 
         #ifdef DEBUG
-          Serial.println("Low Beam OFF");
+                Serial.println("Low Beam OFF");
         #endif
         break;
 
@@ -318,7 +318,7 @@ void loop() {
         digitalWrite(HandBrake, HIGH);
 
         #ifdef DEBUG
-          Serial.println("HandBrake ON");
+                Serial.println("HandBrake ON");
         #endif
         break;
       case HAND_BRAKE_OFF : //HandBrake OFF
@@ -326,10 +326,10 @@ void loop() {
         digitalWrite(HandBrake, LOW);
 
         #ifdef DEBUG
-          Serial.println("HandBrake OFF");
+                Serial.println("HandBrake OFF");
         #endif
         break;
-        
+
       case MUSEUM_ON : //Museum ON
         SW_LED[getSWPos(LowBeam)] = true;
         analogWrite(LowBeam, green_pwm);
@@ -338,15 +338,15 @@ void loop() {
         SW_LED[getSWPos(Oil)] = true;
         analogWrite(Oil, red_pwm);
         SW_LED[getSWPos(HandBrake)] = true;
-        digitalWrite(HandBrake, HIGH); 
+        digitalWrite(HandBrake, HIGH);
         SW_LED[getSWPos(SeatBelt)] = false;
         digitalWrite(SeatBelt, LOW);
-        seatBeltMillis=0;
-        startupMillis=0;   
+        seatBeltMillis = 0;
+        startupMillis = 0;
         #ifdef DEBUG
-          Serial.println("Museum ON : Low Beam On, Battery On, Oil On, HandBrake On");
+                Serial.println("Museum ON : Low Beam On, Battery On, Oil On, HandBrake On");
         #endif
-      break;
+        break;
       case MUSEUM_OFF : //Museum OFF
         SW_LED[getSWPos(LowBeam)] = false;
         digitalWrite(LowBeam, LOW);
@@ -355,71 +355,71 @@ void loop() {
         SW_LED[getSWPos(Oil)] = false;
         digitalWrite(Oil, LOW);;
         SW_LED[getSWPos(HandBrake)] = false;
-        digitalWrite(HandBrake, LOW); 
+        digitalWrite(HandBrake, LOW);
         #ifdef DEBUG
-          Serial.println("Museum OFF : Low Beam Off, Battery Off, Oil Off, HandBrake Off, SeatBelt Off");
+                Serial.println("Museum OFF : Low Beam Off, Battery Off, Oil Off, HandBrake Off, SeatBelt Off");
         #endif
-      break;
-      
+        break;
+
       case FLICKER_START : //Flicker START
         for (int i = 0; i < LEDMAX; i++)
         {
           if (SW_LED[i])//if led is set as on
           {
-            SW_PREV_LED[i]=true;
+            SW_PREV_LED[i] = true;
           }
           else
           {
-            SW_PREV_LED[i]=false;
+            SW_PREV_LED[i] = false;
           }
         }
-        
+
         #ifdef DEBUG
-          Serial.println("Flicker START");
+                Serial.println("Flicker START");
         #endif
         break;
       case FLICKER_ON : //Flicker ON
         SW_LED[getSWPos(HighBeam)] = false;
         digitalWrite(HighBeam, LOW);
         flickerAvailLeds(true);
-        
+
         #ifdef TRACE
-          Serial.println("Flicker ON");
+                Serial.println("Flicker ON");
         #endif
-      break;
+        break;
       case FLICKER_OFF : //Flicker OFF
         flickerAvailLeds(false);
         #ifdef TRACE
-          Serial.println("Flicker OFF");
+                Serial.println("Flicker OFF");
         #endif
-      break;
+        break;
     }
     SW_DASH_LED = 0;
   }
 
   //manage fuel tank led
-  if((startupMillis!=0)&&(millis() - startupMillis >= lowFuelTime))//start full tank is empty after 1h of running
+  if ((startupMillis != 0) && (millis() - startupMillis >= lowFuelTime)) //start full tank is empty after 1h of running
   {
     SW_LED[getSWPos(Fuel)] = true;
     digitalWrite(Fuel, HIGH);
-    startupMillis=0;
-        
+    startupMillis = 0;
+
     #ifdef DEBUG
-      Serial.println("Empty Fuel ON");
+        Serial.println("Empty Fuel ON");
     #endif
   }
 
   //manage seat belt alarm
-  if((seatBeltMillis!=0)&&(millis() - seatBeltMillis >= seatBeltTime))//stop seat belt alarm 7s after ingintion is started
+  if ((seatBeltMillis != 0) && (millis() - seatBeltMillis >= seatBeltTime)) //stop seat belt alarm 7s after ingintion is started
   {
     SW_LED[getSWPos(SeatBelt)] = false;
     digitalWrite(SeatBelt, LOW);
-    seatBeltMillis=0;
+    seatBeltMillis = 0;
     #ifdef DEBUG
-      Serial.println("Seat Belt Alarm OFF");
+        Serial.println("Seat Belt Alarm OFF");
     #endif
   }
-  
+
 }
 
 // function that executes whenever data is received from master
@@ -454,20 +454,20 @@ void stopAllLeds()
 //flicker all leds that are on just before the sequence
 void flickerAvailLeds(bool ledStatus)//ledStatus 0= Off; 1 = On
 {
-  int rightTurnPin=getSWPos(RightTurn);
-  int leftTurnPin=getSWPos(LeftTurn);
-  
+  int rightTurnPin = getSWPos(RightTurn);
+  int leftTurnPin = getSWPos(LeftTurn);
+
   for (int i = 0; i < LEDMAX; i++)
-  { 
-    if((i!=rightTurnPin)&&(i!=leftTurnPin))//check if not turn signal
+  {
+    if ((i != rightTurnPin) && (i != leftTurnPin)) //check if not turn signal
     {
-      if (SW_PREV_LED[i]&&ledStatus)//if led is set as on
+      if (SW_PREV_LED[i] && ledStatus) //if led is set as on
       {
         SW_LED[i] = true;//set led enable
         int pinId = SW_PIN[i];
         analogWrite(pinId, SW_PWM_MAX[i]);
       }
-      if(SW_LED[i]&&!ledStatus)
+      if (SW_LED[i] && !ledStatus)
       {
         //SW_PREV_LED[i]= true;//keep the info of previous status
         SW_LED[i] = false;//set led disable
@@ -485,8 +485,8 @@ int getSWPos(int pinId)
     if (pinId == SW_PIN[i])
     {
       #ifdef TRACE
-            Serial.println(F((String)"PinId : "+pinId));
-            Serial.println(F((String)"SW Id : "+i));
+            Serial.println(F((String)"PinId : " + pinId));
+            Serial.println(F((String)"SW Id : " + i));
       #endif
       return i;
     }

@@ -87,12 +87,12 @@ int hovermodWait = 80;
 
 //byte hover_central_values [2] = {40,80,120};
 byte hover_central_step = 37;
-byte hover_central_mid = hover_central_step*2;
+byte hover_central_mid = hover_central_step * 2;
 byte hover_central_max = 111;
-byte hover_central_current [3] = {hover_central_max,hover_central_mid,hover_central_step};
+byte hover_central_current [3] = {hover_central_max, hover_central_mid, hover_central_step};
 
-bool flames_mode_activated=false;
-bool hover_mode_activated=false;
+bool flames_mode_activated = false;
+bool hover_mode_activated = false;
 bool museumFlames = false;///Activate Flames when Musuem mode is on (infinity loop)?
 
 #define DEBUG 1
@@ -118,16 +118,16 @@ void setup() {
   pinMode(HOVER_MOD_CENTRAL_1, OUTPUT);
   pinMode(HOVER_MOD_CENTRAL_2, OUTPUT);
   pinMode(HOVER_MOD_CENTRAL_3, OUTPUT);
-  
+
   delay(1000); // sanity delay
 
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness( BR_DEF );
 
   Wire.begin(I2C_ADDRESS);                // join i2c bus with address #9
-  Wire.setWireTimeout(5000,true); //concider wire transmission as timeout if communication is longer thant 5s
+  Wire.setWireTimeout(5000, true); //concider wire transmission as timeout if communication is longer thant 5s
   Wire.onReceive(receiveEvent); // register event
-  
+
   randomSeed(analogRead(0));
   Serial.println("Flames & Hover Mode Extension System Started - 2021 F²LAG Team ™");
 }
@@ -136,89 +136,99 @@ void setup() {
 
 void loop()
 {
-  if(messageSize)//check if message as been sent
+  if (messageSize) //check if message as been sent
   {
-    #ifdef DEBUG
-      Serial.print(F("Led Seq : "));
-      Serial.print(SW_LED_SEQ);
-      Serial.println();
-    #endif
-    messageSize=0;
+#ifdef DEBUG
+    Serial.print(F("Led Seq : "));
+    Serial.print(SW_LED_SEQ);
+    Serial.println();
+#endif
+    messageSize = 0;
   }
 
   //Serial.println(BR_DEF);
-  
-  if ((SW_LED_SEQ==1) || (SW_LED_SEQ==4) || (SW_LED_SEQ==7) || (((SW_LED_SEQ==9) || (SW_LED_SEQ==12) || (SW_LED_SEQ==15))&&museumFlames)) {
-     FluxC_Lv = 8;
-     BR_DEF=BRIGHTNESS;
-     R_BR = BRIGHTNESS_MAX;
-     R_INT = MODE_2_INTERVAL;
-     flames_mode_activated=true;
-     Serial.println("Flames Activated");
+
+  if ((SW_LED_SEQ == 1) || (SW_LED_SEQ == 4) || (SW_LED_SEQ == 7) || (((SW_LED_SEQ == 9) || (SW_LED_SEQ == 12) || (SW_LED_SEQ == 15)) && museumFlames)) {
+    FluxC_Lv = 8;
+    BR_DEF = BRIGHTNESS;
+    R_BR = BRIGHTNESS_MAX;
+    R_INT = MODE_2_INTERVAL;
+    flames_mode_activated = true;
+    Serial.println("Flames Activated");
   } else {
     FluxC_Lv = 0;
-    flames_mode_activated=false;
+    flames_mode_activated = false;
+  }
+
+  if ((SW_LED_SEQ == 6) || (SW_LED_SEQ == 7) || (SW_LED_SEQ == 8) || (SW_LED_SEQ == 15) || (SW_LED_SEQ == 16)) {
+    hover_mode_activated = true;
+    analogWrite(HOVER_MOD_FRONT, hover_central_max);
+    analogWrite(HOVER_MOD_BACK, hover_central_max);
+    if (millis() - hovermodLastTime >= hovermodWait)
+    {
+      hovermodLastTime = millis();
+      analogWrite(HOVER_MOD_CENTRAL_1, hover_central_current[0]);
+      analogWrite(HOVER_MOD_CENTRAL_2, hover_central_current[1]);
+      analogWrite(HOVER_MOD_CENTRAL_3, hover_central_current[2]);
+      hover_central_current[0] = next_value(hover_central_current[0]);
+      hover_central_current[1] = next_value(hover_central_current[1]);
+      hover_central_current[2] = next_value(hover_central_current[2]);
+
     }
 
-  if ((SW_LED_SEQ==6) || (SW_LED_SEQ==7) || (SW_LED_SEQ==8) || (SW_LED_SEQ==15) || (SW_LED_SEQ==16)) {    
-    hover_mode_activated=true;
-    analogWrite(HOVER_MOD_FRONT,hover_central_max);
-    analogWrite(HOVER_MOD_BACK,hover_central_max);
-    if(millis() - hovermodLastTime >= hovermodWait)
-    { 
-      hovermodLastTime=millis();
-      analogWrite(HOVER_MOD_CENTRAL_1,hover_central_current[0]);
-      analogWrite(HOVER_MOD_CENTRAL_2,hover_central_current[1]);
-      analogWrite(HOVER_MOD_CENTRAL_3,hover_central_current[2]);
-      hover_central_current[0]=next_value(hover_central_current[0]);
-      hover_central_current[1]=next_value(hover_central_current[1]);
-      hover_central_current[2]=next_value(hover_central_current[2]);
-      
-    }
-     
-    
+
   } else {
-    analogWrite(HOVER_MOD_FRONT,0);
-    analogWrite(HOVER_MOD_BACK,0);
-    analogWrite(HOVER_MOD_CENTRAL_1,0);
-    analogWrite(HOVER_MOD_CENTRAL_2,0);
-    analogWrite(HOVER_MOD_CENTRAL_3,0);
-    hover_central_current[0]=hover_central_max;
-    hover_central_current[1]=hover_central_mid;
-    hover_central_current[2]=hover_central_step;
-    hover_mode_activated=false;
+    analogWrite(HOVER_MOD_FRONT, 0);
+    analogWrite(HOVER_MOD_BACK, 0);
+    analogWrite(HOVER_MOD_CENTRAL_1, 0);
+    analogWrite(HOVER_MOD_CENTRAL_2, 0);
+    analogWrite(HOVER_MOD_CENTRAL_3, 0);
+    hover_central_current[0] = hover_central_max;
+    hover_central_current[1] = hover_central_mid;
+    hover_central_current[2] = hover_central_step;
+    hover_mode_activated = false;
   }
 
   //Serial.println(BR_DEF);
   ring_loop();//activate ring loop
-  
-//  if (R_BR > BRIGHTNESS_MIN){R_BR--;} else {R_BR=BRIGHTNESS_MIN;}
-  
+
+  //  if (R_BR > BRIGHTNESS_MIN){R_BR--;} else {R_BR=BRIGHTNESS_MIN;}
+
   Fire2012(); // run simulation frame
   FastLED.show(); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);
 
-  if (BR_CNT++ > BR_MAX){
-     BR_CNT=0;
-     if (FluxC_Lv!=7 && FluxC_Lv!=8) {
-        if (BR_DEF < 40) {BR_DEF=BR_DEF-1;BR_MAX=8;} else {BR_DEF=BR_DEF-20;BR_MAX=1;} 
-        if (BR_DEF > 10 && BR_DEF < 40 && random8(10) == 1) {BR_DEF=BR_DEF+random8(10);}
-     } 
-     if (BR_DEF<=0){BR_DEF=0;}
-//     Serial.println(BR_DEF);
+  if (BR_CNT++ > BR_MAX) {
+    BR_CNT = 0;
+    if (FluxC_Lv != 7 && FluxC_Lv != 8) {
+      if (BR_DEF < 40) {
+        BR_DEF = BR_DEF - 1;
+        BR_MAX = 8;
+      } else {
+        BR_DEF = BR_DEF - 20;
+        BR_MAX = 1;
+      }
+      if (BR_DEF > 10 && BR_DEF < 40 && random8(10) == 1) {
+        BR_DEF = BR_DEF + random8(10);
+      }
+    }
+    if (BR_DEF <= 0) {
+      BR_DEF = 0;
+    }
+    //     Serial.println(BR_DEF);
 
-     FastLED.setBrightness( BR_DEF );
+    FastLED.setBrightness( BR_DEF );
   }
 
 }
 
 byte next_value(byte current)
 {
-  if(current>hover_central_max)
+  if (current > hover_central_max)
   {
     return 0;
   } else {
-    return (current+hover_central_step);
+    return (current + hover_central_step);
   }
 }
 
@@ -227,7 +237,7 @@ byte next_value(byte current)
 
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
-// Default 50, suggested range 20-100 
+// Default 50, suggested range 20-100
 
 #define COOLING  80
 
@@ -243,151 +253,167 @@ void Fire2012()
   static byte heat[NUM_LEDS];
 
   // Step 1.  Cool down every cell a little
-    for( int i = 0; i < NUM_LEDS; i++) {
-      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
-    }
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+  }
 
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for( int k= NUM_LEDS - 1; k >= 2; k--) {
-      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-    }
+  for ( int k = NUM_LEDS - 1; k >= 2; k--) {
+    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+  }
 
   // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    if( random8() < SPARKING ) {
-      int y = random8(6);
-      heat[y] = qadd8( heat[y], random8(160,255) );
-    }
-    if( random8() < SPARKING ) {
-      int y = NUM_Tire + random8(6);
-      heat[y] = qadd8( heat[y], random8(160,255) );
-    }
+  if ( random8() < SPARKING ) {
+    int y = random8(6);
+    heat[y] = qadd8( heat[y], random8(160, 255) );
+  }
+  if ( random8() < SPARKING ) {
+    int y = NUM_Tire + random8(6);
+    heat[y] = qadd8( heat[y], random8(160, 255) );
+  }
 
   // Step 4.  Map from heat cells to LED colors
-    for( int j = 0; j < NUM_LEDS; j++) {
-      CRGB color = HeatColor( heat[j]);
-      int pixelnumber;
-      if( gReverseDirection ) {
-        pixelnumber = (NUM_LEDS-1) - j;
-      } else {
-        pixelnumber = j;
-      }
-      leds[pixelnumber] = color;
+  for ( int j = 0; j < NUM_LEDS; j++) {
+    CRGB color = HeatColor( heat[j]);
+    int pixelnumber;
+    if ( gReverseDirection ) {
+      pixelnumber = (NUM_LEDS - 1) - j;
+    } else {
+      pixelnumber = j;
     }
+    leds[pixelnumber] = color;
+  }
 }
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany) {
-  int i=0;
-  while(0 < Wire.available())       
+  int i = 0;
+  while (0 < Wire.available())
   {
-    SW_LED_SEQ = Wire.read();//get message sent from master   
+    SW_LED_SEQ = Wire.read();//get message sent from master
   }
   //Serial.println();
-  messageSize=howMany;
+  messageSize = howMany;
 }
 
 //--------------------------------------------------------------------
-void ring_loop(){
+void ring_loop() {
 
   unsigned long now = millis();
-    // 初回のみ、色を設定する - Set the color only for the first time
-     R_BR = BR_DEF;
-     
-    if(now - last_control_time > R_INT)
+  // 初回のみ、色を設定する - Set the color only for the first time
+  R_BR = BR_DEF;
+
+  if (now - last_control_time > R_INT)
+  {
+    if (hover_mode_activated) //check if hover mode is activated set static white color
     {
-      if (hover_mode_activated) //check if hover mode is activated set static white color
+      r = 255;
+      g = 160;
+      b = 40;
+
+      for (uint8_t i = 0; i < NUM_OF_LED; i++)
       {
-          r = 255;
-          g = 160;
-          b = 40;
-
-          for(uint8_t i=0;i<NUM_OF_LED;i++)
-          {
-            pixels.setPixelColor(i, pixels.Color(r,g,b));
-            pixels2.setPixelColor(i, pixels.Color(r,g,b));
-          }
-
-          pixels.setBrightness(BRIGHTNESS);
-          pixels2.setBrightness(BRIGHTNESS);
-       }
-       else if(flames_mode_activated || R_BR!=0)
-       {
-         if (R_BR > 10)
-         {
-            r = 255;
-            g = 160;
-            b = 40;
-            if (random(30)==1)
-            {
-               r = 255;
-               g = 255;
-               b = 255;
-            }
-              if (random(60)==1)
-              {
-               r = 50;
-               g = 50;
-               b = 255;
-              }
-         }
-         else
-         {
-            r = 0;
-            g = 0;
-            b = 0;
-         }
-    
-        //  if (R_BR > BRIGHTNESS_MIN){R_BR=R_BR - 5;}
-        // if (R_BR < BRIGHTNESS_MIN){R_BR=BRIGHTNESS_MIN;}
-          if (R_INT < MODE_1_INTERVAL){R_INT++;} else {R_INT=MODE_1_INTERVAL;}
-          pixels.setBrightness(R_BR);
-          pixels2.setBrightness(R_BR);
-          
-          for(uint8_t i=0;i<NUM_OF_LED;i++){
-              pixels.setPixelColor(i, pixels.Color(0,0,0));
-              pixels2.setPixelColor(i, pixels.Color(0,0,0));
-          }
-          i1 = led_index;
-          i2 = led_index + 3;if (i2 >= NUM_OF_LED) {i2 = i2 - NUM_OF_LED;}
-          i3 = led_index + 6;if (i3 >= NUM_OF_LED) {i3 = i3 - NUM_OF_LED;}
-          i4 = led_index + 9;if (i4 >= NUM_OF_LED) {i4 = i4 - NUM_OF_LED;}
-          pixels.setPixelColor(i1, pixels.Color(r,g,b));
-          pixels.setPixelColor(i2, pixels.Color(r,g,b));
-          pixels.setPixelColor(i3, pixels.Color(r,g,b));
-          pixels.setPixelColor(i4, pixels.Color(r,g,b));
-          
-          led_index2 = NUM_OF_LED - led_index - 1;
-          i1 = led_index2;
-          i2 = led_index2 + 3;if (i2 >= NUM_OF_LED) {i2 = i2 - NUM_OF_LED;}
-          i3 = led_index2 + 6;if (i3 >= NUM_OF_LED) {i3 = i3 - NUM_OF_LED;}
-          i4 = led_index2 + 9;if (i4 >= NUM_OF_LED) {i4 = i4 - NUM_OF_LED;}
-          pixels2.setPixelColor(i1, pixels.Color(r,g,b));
-          pixels2.setPixelColor(i2, pixels.Color(r,g,b));
-          pixels2.setPixelColor(i3, pixels.Color(r,g,b));
-          pixels2.setPixelColor(i4, pixels.Color(r,g,b));
-          
-          led_index++;
-          if(led_index >= NUM_OF_LED){
-            led_index = 0;
-          }
-       } 
-       else 
-       {
-          r = 0;
-          g = 0;
-          b = 0;
-        
-          for(uint8_t i=0;i<NUM_OF_LED;i++)
-          {
-            pixels.setPixelColor(i, pixels.Color(r,g,b));
-            pixels2.setPixelColor(i, pixels.Color(r,g,b));
-          }
+        pixels.setPixelColor(i, pixels.Color(r, g, b));
+        pixels2.setPixelColor(i, pixels.Color(r, g, b));
       }
 
-      pixels.show();
-      pixels2.show();
- 
-      last_control_time = now;
+      pixels.setBrightness(BRIGHTNESS);
+      pixels2.setBrightness(BRIGHTNESS);
     }
+    else if (flames_mode_activated || R_BR != 0)
+    {
+      if (R_BR > 10)
+      {
+        r = 255;
+        g = 160;
+        b = 40;
+        if (random(30) == 1)
+        {
+          r = 255;
+          g = 255;
+          b = 255;
+        }
+        if (random(60) == 1)
+        {
+          r = 50;
+          g = 50;
+          b = 255;
+        }
+      }
+      else
+      {
+        r = 0;
+        g = 0;
+        b = 0;
+      }
+
+      //  if (R_BR > BRIGHTNESS_MIN){R_BR=R_BR - 5;}
+      // if (R_BR < BRIGHTNESS_MIN){R_BR=BRIGHTNESS_MIN;}
+      if (R_INT < MODE_1_INTERVAL) {
+        R_INT++;
+      } else {
+        R_INT = MODE_1_INTERVAL;
+      }
+      pixels.setBrightness(R_BR);
+      pixels2.setBrightness(R_BR);
+
+      for (uint8_t i = 0; i < NUM_OF_LED; i++) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+        pixels2.setPixelColor(i, pixels.Color(0, 0, 0));
+      }
+      i1 = led_index;
+      i2 = led_index + 3; if (i2 >= NUM_OF_LED) {
+        i2 = i2 - NUM_OF_LED;
+      }
+      i3 = led_index + 6; if (i3 >= NUM_OF_LED) {
+        i3 = i3 - NUM_OF_LED;
+      }
+      i4 = led_index + 9; if (i4 >= NUM_OF_LED) {
+        i4 = i4 - NUM_OF_LED;
+      }
+      pixels.setPixelColor(i1, pixels.Color(r, g, b));
+      pixels.setPixelColor(i2, pixels.Color(r, g, b));
+      pixels.setPixelColor(i3, pixels.Color(r, g, b));
+      pixels.setPixelColor(i4, pixels.Color(r, g, b));
+
+      led_index2 = NUM_OF_LED - led_index - 1;
+      i1 = led_index2;
+      i2 = led_index2 + 3; if (i2 >= NUM_OF_LED) {
+        i2 = i2 - NUM_OF_LED;
+      }
+      i3 = led_index2 + 6; if (i3 >= NUM_OF_LED) {
+        i3 = i3 - NUM_OF_LED;
+      }
+      i4 = led_index2 + 9; if (i4 >= NUM_OF_LED) {
+        i4 = i4 - NUM_OF_LED;
+      }
+      pixels2.setPixelColor(i1, pixels.Color(r, g, b));
+      pixels2.setPixelColor(i2, pixels.Color(r, g, b));
+      pixels2.setPixelColor(i3, pixels.Color(r, g, b));
+      pixels2.setPixelColor(i4, pixels.Color(r, g, b));
+
+      led_index++;
+      if (led_index >= NUM_OF_LED) {
+        led_index = 0;
+      }
+    }
+    else
+    {
+      r = 0;
+      g = 0;
+      b = 0;
+
+      for (uint8_t i = 0; i < NUM_OF_LED; i++)
+      {
+        pixels.setPixelColor(i, pixels.Color(r, g, b));
+        pixels2.setPixelColor(i, pixels.Color(r, g, b));
+      }
+    }
+
+    pixels.show();
+    pixels2.show();
+
+    last_control_time = now;
+  }
 }
