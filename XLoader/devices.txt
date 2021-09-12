@@ -1,0 +1,3 @@
+Nano [ATmega328P] (Old Bootloader);m328p;stk500;57600;
+Nano [ATmega328P];m328p;stk500;115200;
+Mega [ATmega2560];atmega2560;stk500v2;115200;
