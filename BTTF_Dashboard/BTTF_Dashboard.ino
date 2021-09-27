@@ -171,7 +171,7 @@ void loop() {
         seatBeltMillis = millis();
 
         #ifdef DEBUG
-                Serial.println("Engine Start -> Battery Off, Oil Off, Seat Belt on for 3.5s");
+                Serial.println((String)"Engine Start -> Battery Off, Oil Off, Seat Belt on for "+(6000/1000)+"s");
         #endif
         break;
       case ENGINE_RUN : //Engine Run
