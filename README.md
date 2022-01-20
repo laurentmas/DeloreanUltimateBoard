@@ -13,6 +13,8 @@ Ultimate Board in Action video : https://www.youtube.com/watch?v=_GSnsW_yHhA&ab_
 
 Instruction to upload code into Arduino can be found there : https://www.arduino.cc/en/Guide/Environment#uploading
 
+Useful link that helps troubleshooting arduino issue : https://www.instructables.com/5-Most-Common-Arduino-Nano-Clone-Problems-and-Thei/
+
 ## Arduino UI Configuration
 Serial Monitor configuration must be set to 115200 baud to be able to see debug logs on the UI.
 
