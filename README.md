@@ -13,6 +13,8 @@ Ultimate Board in Action video : https://www.youtube.com/watch?v=_GSnsW_yHhA&ab_
 
 Instruction to upload code into Arduino can be found there : https://www.arduino.cc/en/Guide/Environment#uploading
 
+Instruction to install Arduino library can be found there (We recommand using library manager): https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries
+
 Useful link that helps troubleshooting arduino issue : https://www.instructables.com/5-Most-Common-Arduino-Nano-Clone-Problems-and-Thei/
 
 ## Arduino UI Configuration
@@ -48,5 +50,9 @@ This Extensibility allows to sync Ultimate Board with Dashboard Modification.
 
 # Flames and Hover Extensibility
 This Extensibility allows to sync Ultimate Board with Led Strip Flames and delorean hovermod.
+
+This extensibility requires additional arduino libraries as :
+- Adafruit NeoPixel (https://github.com/adafruit/Adafruit_NeoPixel)
+- FastLED (https://github.com/FastLED/FastLED)
 
 ![Alt text](./Flames&Wheels_bb.png?raw=true "Flames and Hover Extensibility Wiring")
