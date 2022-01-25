@@ -21,9 +21,12 @@ Useful link that helps troubleshooting arduino issue : https://www.instructables
 Serial Monitor configuration must be set to 115200 baud to be able to see debug logs on the UI.
 
 ## Ultimate board and Extensibility Arduino Power Wiring
-Do not forget to power both ultimate board and Extensibility Arduino as specified in the following schema. 
-If you forget to power ultimate board or extensibility ardunio then you may have issue with IC2 Communication. 
-The result will broke arduino's communication and keep Flux Capacitor in infinite loop without fluxing when required.
+Do not forget to power both ultimate board and Extensibility Arduino as specified in the following schema.
+
+If you forget to power ultimate board or extensibility ardunio then you may have issue with IC2 Communication.
+
+The result will fail arduino's communication and keep Flux Capacitor in infinite loop without fluxing when required.
+
 
 ## Led & Resistor
 In order to protect leds it is required to use resistor to lower current that the led get from the power source.
