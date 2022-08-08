@@ -6,20 +6,44 @@
 
 int SW_DASH_LED;
 
-//arduino pin allocation
-#define HandBrake 2 //D02
-#define RightTurn 3 //D03 PWM
-#define SeatBelt 4 //D04
-#define LowBeam 5 //D05 PWM
-#define HighBeam 6 //D06 PWM
-#define Doors 7 //D07
-#define Lambda 8 //D8
-#define LeftTurn 9 //D09 PWM
-#define Oil 10 //D10 PWM
-#define Battery 11 //D11 PWM
-#define Fuel 12 //D12
+#define ArduinoNano  1
+#define ArduinoProMicro 2
 
+#if defined(__AVR_ATmega328P__)
+  //Code in here will only be compiled if an Arduino Uno (or older) is used.
+  #define Hardware ArduinoNano
+  #define HardwareName "ArduinoNano"
+  //arduino pin allocation
+  #define HandBrake 2 //D02
+  #define RightTurn 3 //D03 PWM
+  #define SeatBelt 4 //D04
+  #define LowBeam 5 //D05 PWM
+  #define HighBeam 6 //D06 PWM
+  #define Doors 7 //D07
+  #define Lambda 8 //D08
+  #define LeftTurn 9 //D09 PWM
+  #define Oil 10 //D10 PWM
+  #define Battery 11 //D11 PWM
+  #define Fuel 12 //D12  
+#endif
 
+#if defined(__AVR_ATmega32U4__)
+  //Code in here will only be compiled if an Arduino Leonardo is used.
+  #define Hardware ArduinoProMicro
+  #define HardwareName "ArduinoProMicro"
+  //arduino pin allocation
+  #define HandBrake 18 //A0
+  #define RightTurn 15 //D15
+  #define SeatBelt 14 //D14
+  #define LowBeam 16 //D16
+  #define HighBeam 10 //D10 PWM
+  #define Doors 4 //D04
+  #define Lambda 5 //D05 PWM
+  #define LeftTurn 6 //D06 PWM
+  #define Oil 7 //D07 
+  #define Battery 8 //D08
+  #define Fuel 9 //D09 PWM  
+#endif
 
 //I2C Actions Infos
 #define ALL_OFF 1
@@ -47,6 +71,10 @@ int SW_DASH_LED;
 #define FLICKER_START 23
 #define FLICKER_ON 24
 #define FLICKER_OFF 25
+#define FUEL_ON 26
+#define FUEL_OFF 27
+#define LAMBDA_ON 28
+#define LAMBDA_OFF 29
 
 byte red_pwm = 100;
 byte green_pwm = 105;
@@ -66,16 +94,31 @@ int seatBeltTime = 6000;
 
 int messageSize = 0;
 
-#define LEDMAX 11        //id        0    1    2    3    4    5    6    7    8    9   10
-byte     SW_PIN       [LEDMAX] = {   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12}; // LED OUTPUT PIN
+#define LEDMAX 11        
+#if Hardware == ArduinoNano   //id     0    1    2    3    4    5    6    7    8    9   10                           
+  byte     SW_PIN       [LEDMAX] = {   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12}; // LED OUTPUT PIN
+#else
+  byte     SW_PIN       [LEDMAX] = {  18,  15,  14,  16,  10,   4,   5,   6,   7,   8,   9}; // LED OUTPUT PIN
+#endif
 byte     SW_PWM_MAX   [LEDMAX] = { 255, 105, 255, 105, 125, 255, 255, 105, 100, 100, 255}; // LED OUTPUT PWM Value ; 255 = Digital
 boolean  SW_LED       [LEDMAX] = {}; // LED
 boolean  SW_PREV_LED  [LEDMAX] = {}; // LED
 
 void setup() {
 
-  Serial.begin(115200);           // start serial for output
-
+  unsigned int count=0;
+  #ifdef DEBUG    
+    #if Hardware == ArduinoProMicro
+      USBCON|=(1<<OTGPADE); //enables VBUS pad
+      if(USBSTA&(1<<VBUS)){  //checks state of VBUS
+        Serial.begin(115200);           // start serial for output
+        while(!Serial && millis()<2000);
+      }
+    #elif Hardware == ArduinoNano
+      Serial.begin(115200);           // start serial for output
+    #endif
+  #endif
+  
   pinMode(SeatBelt, OUTPUT); //not used
   pinMode(Doors, OUTPUT); //linked to dome light
   pinMode(LeftTurn, OUTPUT); //linked to Left turn and warning
@@ -88,13 +131,17 @@ void setup() {
   pinMode(Fuel, OUTPUT); //randon long warning ?
   pinMode(HandBrake, OUTPUT);//linked to engine startup & run maybe
 
-  Wire.begin(I2C_ADDRESS);                // join i2c bus with address #8
+  Wire.begin(I2C_ADDRESS);                // join i2c bus with address #88
   Wire.setWireTimeout(5000, true); //concider wire transmission as timeout if communication is longer thant 5s
   Wire.clearWireTimeoutFlag();
   Wire.onReceive(receiveEvent); // register event
 
   startupMillis = millis();
-  Serial.println("Dashboard Extension System Started - 2021 F²LAG Team ™");
+  #ifdef DEBUG
+    Serial.print(F("Dashboard Extension System Started - "));
+    Serial.print(HardwareName);
+    Serial.println(" - 2021 F²LAG Team ™");
+  #endif
 
 }
 
@@ -131,13 +178,21 @@ void loop() {
 
       case IGNITION_ON : //ignition Key On
         SW_LED[getSWPos(Battery)] = true;
-        analogWrite(Battery, red_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(Battery, red_pwm);
+        #else
+          digitalWrite(Battery, HIGH);
+        #endif
         SW_LED[getSWPos(Oil)] = true;
-        analogWrite(Oil, red_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(Oil, red_pwm);
+        #else
+          digitalWrite(Oil, HIGH);
+        #endif
         SW_LED[getSWPos(HandBrake)] = true;
         digitalWrite(HandBrake, HIGH);
-        SW_LED[getSWPos(HandBrake)] = true;
-        digitalWrite(HandBrake, HIGH);
+        SW_LED[getSWPos(SeatBelt)] = true;
+        digitalWrite(SeatBelt, HIGH);
 
         #ifdef DEBUG
                 Serial.println("Ignition On -> Battery On, Oil On, HandBrake On");
@@ -215,7 +270,11 @@ void loop() {
         lastTurnBlink = 0;
         turnSignalStatus = 1; //0=off,1=leftSignal,2=rightSignal,3=hazard
         SW_LED[getSWPos(LeftTurn)] = true;
-        analogWrite(LeftTurn, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(LeftTurn, green_pwm);
+        #else
+          digitalWrite(LeftTurn, HIGH);
+        #endif
         SW_LED[getSWPos(RightTurn)] = false;
         digitalWrite(RightTurn, LOW);
 
@@ -237,7 +296,11 @@ void loop() {
         lastTurnBlink = 0;
         turnSignalStatus = 2; //0=off,1=leftSignal,2=rightSignal,3=hazard
         SW_LED[getSWPos(RightTurn)] = true;
-        analogWrite(RightTurn, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(RightTurn, green_pwm);
+        #else
+          digitalWrite(RightTurn, HIGH);
+        #endif
         SW_LED[getSWPos(LeftTurn)] = false;
         digitalWrite(LeftTurn, LOW);
 
@@ -259,9 +322,17 @@ void loop() {
         lastTurnBlink = 0;
         turnSignalStatus = 3; //0=off,1=leftSignal,2=rightSignal,3=hazard
         SW_LED[getSWPos(LeftTurn)] = true;
-        analogWrite(LeftTurn, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(LeftTurn, green_pwm);
+        #else
+          digitalWrite(LeftTurn, HIGH);
+        #endif
         SW_LED[getSWPos(RightTurn)] = true;
-        analogWrite(RightTurn, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(RightTurn, green_pwm);
+        #else
+          digitalWrite(RightTurn, HIGH);
+        #endif
 
         #ifdef TRACE
                 Serial.println("Warning/Hazard On");
@@ -282,7 +353,11 @@ void loop() {
 
       case H_BEAM_ON : //High Beam ON
         SW_LED[getSWPos(HighBeam)] = true;
-        analogWrite(HighBeam, blue_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(HighBeam, blue_pwm);
+        #else
+          digitalWrite(HighBeam, HIGH);
+        #endif
 
         #ifdef DEBUG
                 Serial.println("High Beam ON");
@@ -298,7 +373,11 @@ void loop() {
         break;
       case L_BEAM_ON : //Low Beam ON
         SW_LED[getSWPos(LowBeam)] = true;
-        analogWrite(LowBeam, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(LowBeam, green_pwm);
+        #else
+          digitalWrite(LowBeam, HIGH);
+        #endif
 
         #ifdef DEBUG
                 Serial.println("Low Beam ON");
@@ -332,11 +411,23 @@ void loop() {
 
       case MUSEUM_ON : //Museum ON
         SW_LED[getSWPos(LowBeam)] = true;
-        analogWrite(LowBeam, green_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(LowBeam, green_pwm);
+        #else
+          digitalWrite(LowBeam, HIGH);
+        #endif
         SW_LED[getSWPos(Battery)] = true;
-        analogWrite(Battery, red_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(Battery, red_pwm);
+        #else
+          digitalWrite(Battery, HIGH);
+        #endif
         SW_LED[getSWPos(Oil)] = true;
-        analogWrite(Oil, red_pwm);
+        #if Hardware == ArduinoNano
+          analogWrite(Oil, red_pwm);
+        #else
+          digitalWrite(Oil, HIGH);
+        #endif
         SW_LED[getSWPos(HandBrake)] = true;
         digitalWrite(HandBrake, HIGH);
         SW_LED[getSWPos(SeatBelt)] = false;
@@ -393,6 +484,42 @@ void loop() {
                 Serial.println("Flicker OFF");
         #endif
         break;
+
+
+        case FUEL_ON : //Fuel On
+        SW_LED[getSWPos(Fuel)] = true;
+        digitalWrite(Fuel, HIGH);
+
+        #ifdef DEBUG
+                Serial.println("Fuel On");
+        #endif
+        break;
+      case FUEL_OFF : //Fuel Off
+        SW_LED[getSWPos(Fuel)] = false;
+        digitalWrite(Fuel, LOW);
+
+        #ifdef DEBUG
+                Serial.println("Fuel Off");
+        #endif
+        break;
+
+        case LAMBDA_ON : //Lambda On
+        SW_LED[getSWPos(Lambda)] = true;
+        digitalWrite(Lambda, HIGH);
+
+        #ifdef DEBUG
+                Serial.println("Lambda On");
+        #endif
+        break;
+      case LAMBDA_OFF : //Lambda Off
+        SW_LED[getSWPos(Lambda)] = false;
+        digitalWrite(Lambda, LOW);
+
+        #ifdef DEBUG
+                Serial.println("Lambda Off");
+        #endif
+        break;
+        
     }
     SW_DASH_LED = 0;
   }
@@ -464,8 +591,12 @@ void flickerAvailLeds(bool ledStatus)//ledStatus 0= Off; 1 = On
       if (SW_PREV_LED[i] && ledStatus) //if led is set as on
       {
         SW_LED[i] = true;//set led enable
-        int pinId = SW_PIN[i];
-        analogWrite(pinId, SW_PWM_MAX[i]);
+        int pinId = SW_PIN[i];        
+        #if Hardware == ArduinoNano
+          analogWrite(pinId, SW_PWM_MAX[i]);
+        #else
+          digitalWrite(pinId, HIGH);
+        #endif
       }
       if (SW_LED[i] && !ledStatus)
       {
@@ -485,8 +616,8 @@ int getSWPos(int pinId)
     if (pinId == SW_PIN[i])
     {
       #ifdef TRACE
-            Serial.println(F((String)"PinId : " + pinId));
-            Serial.println(F((String)"SW Id : " + i));
+            Serial.println((String)"PinId : " + pinId);
+            Serial.println((String)"SW Id : " + i);
       #endif
       return i;
     }
