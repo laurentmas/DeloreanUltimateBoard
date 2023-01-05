@@ -54,7 +54,13 @@ PWM value are set to deliver the following voltage :
 
 This Extensibility allows to sync Ultimate Board with Dashboard Modification.
 
+### Delorean Dashboard Extensibility - Arduino Nano DIY
 ![Alt text](./DashBoard_bb.png?raw=true "Delorean Dashboard Extensibility Wiring")
+
+
+### Delorean Dashboard Extensibility - Custom Arduino Pro Micro Board
+![Alt text](./DashBoard-ProMicro_bb.png?raw=true "Delorean Dashboard Extensibility Board Wiring")
+
 
 # Flames and Hover Extensibility
 This Extensibility allows to sync Ultimate Board with Led Strip Flames and delorean hovermod.
