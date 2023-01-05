@@ -112,7 +112,7 @@ void setup() {
       USBCON|=(1<<OTGPADE); //enables VBUS pad
       if(USBSTA&(1<<VBUS)){  //checks state of VBUS
         Serial.begin(115200);           // start serial for output
-        while(!Serial && millis()<2000);
+        while(!Serial && millis()<3000);
       }
     #elif Hardware == ArduinoNano
       Serial.begin(115200);           // start serial for output
