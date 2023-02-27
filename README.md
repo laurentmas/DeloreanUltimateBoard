@@ -25,6 +25,7 @@ Serial Monitor configuration must be set to 115200 baud to be able to see debug 
 For Arduino Leonardo only (with custom dashboard electronic board):
  - For Normal mode, DEBUG variable must be commented when board is plugged only to the car. 
  - For debuging mode, DEBUG variable must be uncommented when mini usb is plugged to the computer //#define DEBUG 1.
+ 
 DEBUG variable must be commented in car usage or arduino will start with 3s delay and fails to join Mainboard I2C Bus.
 
 
