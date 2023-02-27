@@ -1,6 +1,6 @@
 #include <Wire.h>
 
-#define DEBUG 1
+//#define DEBUG 1 // DEBUG variable must be commented in car usage, or arduino will start with 3s latency and fails to join I2C Bus
 //#define TRACE 1
 #define I2C_ADDRESS 88
 
@@ -140,7 +140,7 @@ void setup() {
   #ifdef DEBUG
     Serial.print(F("Dashboard Extension System Started - "));
     Serial.print(HardwareName);
-    Serial.println(" - 2021 F²LAG Team ™");
+    Serial.println(" - 2021-2023 F²LAG Team ™");
   #endif
 
 }
