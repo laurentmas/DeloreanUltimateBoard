@@ -107,25 +107,6 @@ boolean  SW_LED       [LEDMAX] = {}; // LED
 boolean  SW_PREV_LED  [LEDMAX] = {}; // LED
 
 void setup() {
-
-  unsigned int count=0;
-  //#ifdef DEBUG    
-    #if Hardware == ArduinoProMicro
-      USBCON|=(1<<OTGPADE); //enables VBUS pad
-      if ((USBSTA & (1 << VBUS)) != 0) //checks state of VBUS
-      {  
-        Serial.begin(115200);           // start serial for output
-        while(!Serial && millis()<3000);
-        if(Serial.availableForWrite())
-        {
-          usbConnected = true;
-        }
-      }
-    #elif Hardware == ArduinoNano
-      Serial.begin(115200);           // start serial for output
-      usbConnected = true;
-    #endif
-  //#endif
   
   pinMode(SeatBelt, OUTPUT); //not used
   pinMode(Doors, OUTPUT); //linked to dome light
@@ -145,6 +126,23 @@ void setup() {
   Wire.onReceive(receiveEvent); // register event
 
   startupMillis = millis();
+
+  #if Hardware == ArduinoProMicro
+    USBCON|=(1<<OTGPADE); //enables VBUS pad
+    if ((USBSTA & (1 << VBUS)) != 0) //checks state of VBUS
+    {  
+      Serial.begin(115200);           // start serial for output
+      while(!Serial && millis()<3000);
+      if(Serial.availableForWrite())
+      {
+        usbConnected = true;
+      }
+    }
+  #elif Hardware == ArduinoNano
+    Serial.begin(115200);           // start serial for output
+    usbConnected = true;
+  #endif
+    
   if(usbConnected)
   {
     Serial.print(F("Dashboard Extension System Started - "));
