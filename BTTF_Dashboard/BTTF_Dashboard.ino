@@ -94,6 +94,8 @@ int seatBeltTime = 6000;
 
 int messageSize = 0;
 
+bool usbConnected = false;
+
 #define LEDMAX 11        
 #if Hardware == ArduinoNano   //id     0    1    2    3    4    5    6    7    8    9   10                           
   byte     SW_PIN       [LEDMAX] = {   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12}; // LED OUTPUT PIN
@@ -107,17 +109,23 @@ boolean  SW_PREV_LED  [LEDMAX] = {}; // LED
 void setup() {
 
   unsigned int count=0;
-  #ifdef DEBUG    
+  //#ifdef DEBUG    
     #if Hardware == ArduinoProMicro
       USBCON|=(1<<OTGPADE); //enables VBUS pad
-      if(USBSTA&(1<<VBUS)){  //checks state of VBUS
+      if ((USBSTA & (1 << VBUS)) != 0) //checks state of VBUS
+      {  
         Serial.begin(115200);           // start serial for output
         while(!Serial && millis()<3000);
+        if(Serial.availableForWrite())
+        {
+          usbConnected = true;
+        }
       }
     #elif Hardware == ArduinoNano
       Serial.begin(115200);           // start serial for output
+      usbConnected = true;
     #endif
-  #endif
+  //#endif
   
   pinMode(SeatBelt, OUTPUT); //not used
   pinMode(Doors, OUTPUT); //linked to dome light
@@ -137,11 +145,12 @@ void setup() {
   Wire.onReceive(receiveEvent); // register event
 
   startupMillis = millis();
-  #ifdef DEBUG
+  if(usbConnected)
+  {
     Serial.print(F("Dashboard Extension System Started - "));
     Serial.print(HardwareName);
     Serial.println(" - 2021-2023 F²LAG Team ™");
-  #endif
+  }
 
 }
 
