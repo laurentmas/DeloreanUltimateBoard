@@ -243,7 +243,6 @@ void loop() {
         digitalWrite(Oil, LOW);
         SW_LED[getSWPos(HandBrake)] = false;
         digitalWrite(HandBrake, LOW);
-
         #ifdef DEBUG
                 Serial.println("Engine Run -> HandBrake Off");
         #endif
