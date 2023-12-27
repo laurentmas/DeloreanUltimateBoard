@@ -76,6 +76,15 @@ int SW_DASH_LED;
 #define FUEL_OFF 27
 #define LAMBDA_ON 28
 #define LAMBDA_OFF 29
+//new I2C Actions, requires Ultimate Board code version 15.09.2023.1
+#define TRAVEL_ON 30
+#define TRAVEL_OFF 31
+#define AUX1_ON 32
+#define AUX1_OFF 33
+#define AUX2_ON 34
+#define AUX2_OFF 35
+#define AUX3_ON 36
+#define AUX3_OFF 37
 
 byte red_pwm = 100;
 byte green_pwm = 105;
@@ -133,8 +142,8 @@ void setup() {
     if ((USBSTA & (1 << VBUS)) != 0) //checks state of VBUS
     {  
       Serial.begin(115200);           // start serial for output
-      while(!Serial && millis()<3000);
-      if(Serial.availableForWrite())
+      while(!Serial && (millis() - startupMillis <3000));
+      if(Serial.availableForWrite()+Serial.available()>0)
       {
         usbConnected = true;
       }
